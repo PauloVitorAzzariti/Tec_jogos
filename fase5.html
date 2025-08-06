@@ -86,6 +86,8 @@
     <input type="text" id="resposta" placeholder="Digite a resposta aqui">
     <br>
     <button onclick="verificar()">Desbloquear</button>
+    <br>
+    <button onclick="mostrarDica()" id="botaoDica">📜 Carta de Dica</button>
   </div>
   <div class="text-box" id="msg">
     🤖 <strong>Fase 5 - Enigma do Portão Futurista</strong><br>
@@ -107,6 +109,12 @@
     } else {
       document.getElementById("msg").innerHTML = "❌ Resposta incorreta. Tente novamente!<br><em>Dica: Sem mim, os programas não funcionam.</em>";
     }
+  }
+
+  function mostrarDica() {
+    const btn = document.getElementById("botaoDica");
+    if (btn) btn.remove();
+    document.getElementById("msg").innerHTML += "<br><br>💡 <strong>Dica extra:</strong> Sou responsável por fazer com que os dispositivos funcionem, mas não posso ser tocado.";
   }
 
   function next() {
