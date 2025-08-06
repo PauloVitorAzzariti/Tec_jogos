@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Tech Quest – Fase 6</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(to bottom, #1a1a1a, #004d40);
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      padding: 40px;
+      flex-wrap: wrap;
+    }
+
+    .itens, .gabinete {
+      width: 45%;
+      min-height: 300px;
+      padding: 20px;
+      border: 3px dashed #00e676;
+      border-radius: 15px;
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .itens {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .item {
+      padding: 15px 20px;
+      background: #1de9b6;
+      color: #000;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .gabinete {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .item.dragging {
+      opacity: 0.5;
+    }
+
+    .feedback {
+      text-align: center;
+      font-size: 20px;
+      margin-top: 20px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 25px;
+      font-size: 16px;
+      background: #00e676;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #00c853;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🛠️ Fase 6 – Monte o Computador Corretamente</h1>
+
+  <div class="container">
+    <div class="itens" id="itens">
+      <div class="item" draggable="true" data-correto="true">Placa-mãe</div>
+      <div class="item" draggable="true" data-correto="true">CPU</div>
+      <div class="item" draggable="true" data-correto="true">Memória RAM</div>
+      <div class="item" draggable="true" data-correto="true">Fonte</div>
+      <div class="item" draggable="true" data-correto="false">Banana</div>
+      <div class="item" draggable="true" data-correto="false">Camisa</div>
+      <div class="item" draggable="true" data-correto="false">Bola</div>
+      <div class="item" draggable="true" data-correto="false">Copo</div>
+    </div>
+
+    <div class="gabinete" id="gabinete" ondragover="permitirSoltar(event)" ondrop="soltar(event)">
+      <p>Arraste aqui os componentes corretos</p>
+    </div>
+  </div>
+
+  <div class="feedback" id="feedback"></div>
+
+  <div style="text-align: center;">
+    <button id="proximo" style="display:none;" onclick="next()">Avançar para Fase 7</button>
+  </div>
+
+  <script>
+    const itens = document.querySelectorAll('.item');
+    const gabinete = document.getElementById('gabinete');
+    const feedback = document.getElementById('feedback');
+    let corretosSoltos = 0;
+
+    itens.forEach(item => {
+      item.addEventListener('dragstart', () => {
+        item.classList.add('dragging');
+      });
+      item.addEventListener('dragend', () => {
+        item.classList.remove('dragging');
+      });
+    });
+
+    function permitirSoltar(e) {
+      e.preventDefault();
+    }
+
+    function soltar(e) {
+      e.preventDefault();
+      const itemArrastado = document.querySelector('.dragging');
+      const correto = itemArrastado.getAttribute('data-correto') === 'true';
+
+      if (correto) {
+        if (!gabinete.contains(itemArrastado)) {
+          gabinete.appendChild(itemArrastado);
+          corretosSoltos++;
+        }
+
+        if (corretosSoltos === 4) {
+          feedback.innerHTML = "✅ Parabéns! Você montou corretamente o computador!";
+          document.getElementById("proximo").style.display = "inline-block";
+        }
+      } else {
+        feedback.innerHTML = "❌ Esse item não faz parte da montagem!";
+        setTimeout(() => {
+          feedback.innerHTML = "";
+        }, 2000);
+      }
+    }
+
+    function next() {
+      window.location.href = "fase7.html";
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Fase 9 – Desafio Relâmpago</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      margin: 0;
+      padding: 20px;
+      color: white;
+      text-align: center;
+      overflow-x: hidden;
+    }
+
+    h1 { margin-top: 10px; }
+
+    #progress-container {
+      width: 80%;
+      background-color: #ddd;
+      border-radius: 30px;
+      margin: 20px auto;
+      height: 20px;
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #00e676;
+      border-radius: 30px;
+      transition: width 0.5s ease-in-out;
+    }
+
+    #pergunta {
+      margin-top: 20px;
+      font-size: 24px;
+      min-height: 60px;
+    }
+
+    .opcoes {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .opcao {
+      background: #00e5ff;
+      color: black;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      width: 300px;
+    }
+
+    .opcao:hover { background: #00bcd4; }
+
+    #contador {
+      margin-top: 10px;
+      font-size: 18px;
+      color: #ffd54f;
+    }
+
+    #resultado {
+      font-size: 22px;
+      margin-top: 20px;
+      min-height: 30px;
+    }
+
+    #popup {
+      display: none;
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      color: #000;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      z-index: 9999;
+      text-align: center;
+    }
+
+    #popup button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      background: #ff5722;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .vibrar {
+      animation: vibrar 0.4s ease-in-out;
+    }
+
+    @keyframes vibrar {
+      0% { transform: translateX(0px); }
+      25% { transform: translateX(-8px); }
+      50% { transform: translateX(8px); }
+      75% { transform: translateX(-8px); }
+      100% { transform: translateX(0px); }
+    }
+
+    #proximo {
+      display: none;
+      margin-top: 20px;
+      padding: 10px 25px;
+      background: #00e676;
+      color: #000;
+      border: none;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #proximo:hover { background: #00c853; }
+  </style>
+</head>
+<body>
+
+<h1>⚡ Fase 9 – Desafio Relâmpago</h1>
+
+<div id="progress-container">
+  <div id="progress-bar"></div>
+</div>
+
+<div id="pergunta">Carregando pergunta...</div>
+<div class="opcoes" id="opcoes"></div>
+<div id="contador">Tempo restante: <span id="tempo">10</span>s</div>
+<div id="resultado"></div>
+<button id="proximo" onclick="next()">Avançar para Fase 10</button>
+
+<!-- POPUP -->
+<div id="popup">
+  <div id="explicacaoTexto"></div>
+  <button onclick="fecharPopup()">Tentar novamente</button>
+</div>
+
+<script>
+  const perguntas = [
+    { pergunta: "O que é o Word?", correta: "Software", opcoes: ["Hardware", "Software", "Alimento"], explicacao: "Word é um programa de edição de texto. Portanto, é Software." },
+    { pergunta: "O que é o Teclado?", correta: "Hardware", opcoes: ["Roupas", "Software", "Hardware"], explicacao: "Teclado é um dispositivo físico usado para digitar. É Hardware." },
+    { pergunta: "O que é o Google Chrome?", correta: "Software", opcoes: ["Hardware", "Software", "Comida"], explicacao: "Chrome é um navegador de internet. É Software." },
+    { pergunta: "O que é um Monitor?", correta: "Hardware", opcoes: ["Software", "Ferramenta", "Hardware"], explicacao: "Monitor é um equipamento que exibe imagens. É Hardware." },
+    { pergunta: "O que é o Excel?", correta: "Software", opcoes: ["Software", "Hardware", "Fruta"], explicacao: "Excel é usado para criar planilhas. É Software." },
+    { pergunta: "O que é a CPU?", correta: "Hardware", opcoes: ["Software", "Hardware", "Roupas"], explicacao: "CPU é a unidade de processamento central. É Hardware." },
+    { pergunta: "PowerPoint é:", correta: "Software", opcoes: ["Alimento", "Software", "Hardware"], explicacao: "PowerPoint é um programa de apresentação. É Software." },
+    { pergunta: "Placa-Mãe é:", correta: "Hardware", opcoes: ["Software", "Ferramenta", "Hardware"], explicacao: "Placa-Mãe conecta todos os componentes do computador. É Hardware." },
+    { pergunta: "Paint é:", correta: "Software", opcoes: ["Software", "Hardware", "Comida"], explicacao: "Paint é usado para desenhos simples. É Software." },
+    { pergunta: "Mouse é:", correta: "Hardware", opcoes: ["Hardware", "Roupas", "Software"], explicacao: "Mouse é um dispositivo de entrada. É Hardware." }
+  ];
+
+  let indice = 0;
+  let acertos = 0;
+  let tempo = 10;
+  let intervalo;
+
+  const perguntaDiv = document.getElementById("pergunta");
+  const opcoesDiv = document.getElementById("opcoes");
+  const tempoSpan = document.getElementById("tempo");
+  const resultado = document.getElementById("resultado");
+  const progressBar = document.getElementById("progress-bar");
+  const popup = document.getElementById("popup");
+  const explicacaoTexto = document.getElementById("explicacaoTexto");
+
+  function iniciarPergunta() {
+    if (indice >= perguntas.length) {
+      perguntaDiv.innerHTML = "✅ Fase Concluída!";
+      resultado.innerHTML = `Você acertou <strong>${acertos}</strong> de ${perguntas.length} perguntas.`;
+      document.getElementById("proximo").style.display = "inline-block";
+      opcoesDiv.innerHTML = "";
+      document.getElementById("contador").style.display = "none";
+      return;
+    }
+
+    atualizarBarraProgresso();
+
+    const atual = perguntas[indice];
+    perguntaDiv.textContent = atual.pergunta;
+    opcoesDiv.innerHTML = "";
+
+    atual.opcoes.forEach(op => {
+      const btn = document.createElement("button");
+      btn.className = "opcao";
+      btn.textContent = op;
+      btn.onclick = () => verificarResposta(op);
+      opcoesDiv.appendChild(btn);
+    });
+
+    tempo = 10;
+    tempoSpan.textContent = tempo;
+    intervalo = setInterval(contarTempo, 1000);
+  }
+
+  function contarTempo() {
+    tempo--;
+    tempoSpan.textContent = tempo;
+    if (tempo <= 0) {
+      clearInterval(intervalo);
+      mostrarPopup("⏰ Tempo esgotado! A resposta era: " + perguntas[indice].correta + ".<br><br>" + perguntas[indice].explicacao);
+    }
+  }
+
+  function verificarResposta(resposta) {
+    clearInterval(intervalo);
+    const correta = perguntas[indice].correta;
+
+    if (resposta === correta) {
+      acertos++;
+      resultado.innerHTML = "✅ Resposta correta!";
+      setTimeout(() => {
+        indice++;
+        resultado.innerHTML = "";
+        iniciarPergunta();
+      }, 1000);
+    } else {
+      vibrar();
+      mostrarPopup(`❌ Resposta errada! A resposta certa é: <strong>${correta}</strong><br><br>${perguntas[indice].explicacao}`);
+    }
+  }
+
+  function vibrar() {
+    document.body.classList.add("vibrar");
+    setTimeout(() => {
+      document.body.classList.remove("vibrar");
+    }, 400);
+  }
+
+  function mostrarPopup(texto) {
+    explicacaoTexto.innerHTML = texto;
+    popup.style.display = "block";
+  }
+
+  function fecharPopup() {
+    popup.style.display = "none";
+    iniciarPergunta();
+  }
+
+  function atualizarBarraProgresso() {
+    const progresso = ((indice) / perguntas.length) * 100;
+    progressBar.style.width = `${progresso}%`;
+  }
+
+  function next() {
+    window.location.href = "fase10.html";
+  }
+
+  iniciarPergunta();
+</script>
+
+</body>
+</html>
+

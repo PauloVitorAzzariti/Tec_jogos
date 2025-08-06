@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Tech Quest - Início</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    .logo {
+      width: 250px;
+      height: auto;
+      margin-bottom: 40px;
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 1.2em;
+      max-width: 600px;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      background-color: #4caf50;
+      border: none;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #388e3c;
+    }
+  </style>
+</head>
+<body>
+
+  <img src="img/Logo_branca.png" alt="Logo da Escola" class="logo">
+  <h1>Bem-vindo ao Tech Quest</h1>
+  <p>Prepare-se para uma jornada educativa cheia de missões tecnológicas! Encontre os elementos de Hardware e Software escondidos em cada fase e avance no jogo.</p>
+  <button onclick="startGame()">Iniciar Jogo</button>
+
+  <script>
+    function startGame() {
+      window.location.href = 'fase1.html';
+    }
+  </script>
+
+</body>
+</html>

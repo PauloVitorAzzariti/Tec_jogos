@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Tech Quest – Fase 4</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(to right, #0c0032, #190061);
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+      color: #fff;
+    }
+    .scene {
+      perspective: 800px;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 40px;
+      box-sizing: border-box;
+    }
+    .object {
+      width: 100px;
+      height: 100px;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: rotate 6s infinite linear;
+      cursor: pointer;
+    }
+    .face {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background: #6a1b9a;
+      border: 2px solid #fff;
+      opacity: 0.95;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 13px;
+      font-weight: bold;
+      text-align: center;
+      padding: 5px;
+    }
+    .front  { transform: rotateY(0deg) translateZ(50px); }
+    .back   { transform: rotateY(180deg) translateZ(50px); }
+    .right  { transform: rotateY(90deg) translateZ(50px); }
+    .left   { transform: rotateY(-90deg) translateZ(50px); }
+    .top    { transform: rotateX(90deg) translateZ(50px); }
+    .bottom { transform: rotateX(-90deg) translateZ(50px); }
+
+    @keyframes rotate {
+      from { transform: rotateX(0deg) rotateY(0deg); }
+      to   { transform: rotateX(360deg) rotateY(360deg); }
+    }
+
+    .text-box {
+      position: absolute;
+      bottom: 30px;
+      background: rgba(0,0,0,0.7);
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 18px;
+      width: 80%;
+      max-width: 700px;
+      text-align: center;
+    }
+
+    .timer {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      background: #000;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 20px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      background: #ff4081;
+      color: #fff;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #e91e63;
+    }
+  </style>
+</head>
+<body>
+
+<div class="timer" id="timer">⏳ Tempo: 60</div>
+<div class="scene" id="gameScene"></div>
+
+<div class="text-box" id="msg">
+  🧩 <strong>Fase 4 - Encontre os Pares!</strong><br>
+  Nesta fase, sua missão é encontrar <strong>2 pares corretos</strong> de objetos que se complementam tecnologicamente (ex: Mouse + Teclado, Word + PowerPoint). Clique nos pares certos antes que o tempo acabe!
+</div>
+
+<script>
+  const paresCorretos = [
+    ['Teclado', 'Mouse'],
+    ['Word', 'PowerPoint']
+  ];
+
+  const distratores = [
+    'Banana', 'Camisa', 'Pneu', 'Toalha', 'Livro', 'Boné', 'Corda', 'Raquete', 'Mesa', 'Chave', 'Bola', 'Relógio', 'Garrafa'
+  ];
+
+  let objetos = [];
+  paresCorretos.forEach(par => {
+    objetos.push({ nome: par[0], tipo: 'par1', grupo: par[0] + par[1] });
+    objetos.push({ nome: par[1], tipo: 'par2', grupo: par[0] + par[1] });
+  });
+  objetos = objetos.concat(distratores.map(n => ({ nome: n, tipo: 'Outro' })));
+  objetos = objetos.sort(() => Math.random() - 0.5);
+
+  const container = document.getElementById('gameScene');
+  let selecionados = [];
+  let paresFormados = 0;
+  let tempo = 60;
+  let gameOver = false;
+
+  objetos.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'object';
+    el.dataset.nome = item.nome;
+    el.dataset.tipo = item.tipo;
+    el.dataset.grupo = item.grupo || 'X';
+    el.onclick = () => selecionar(el);
+    el.innerHTML = `
+      <div class="face front">${item.nome}</div>
+      <div class="face back">${item.nome}</div>
+      <div class="face right">${item.nome}</div>
+      <div class="face left">${item.nome}</div>
+      <div class="face top">${item.nome}</div>
+      <div class="face bottom">${item.nome}</div>
+    `;
+    container.appendChild(el);
+  });
+
+  function selecionar(el) {
+    if (gameOver || selecionados.includes(el)) return;
+    el.style.border = '3px solid yellow';
+    selecionados.push(el);
+
+    if (selecionados.length === 2) {
+      const [a, b] = selecionados;
+      if (a.dataset.grupo === b.dataset.grupo && a.dataset.tipo !== b.dataset.tipo && a.dataset.tipo !== 'Outro') {
+        a.style.border = b.style.border = '3px solid lime';
+        paresFormados++;
+        if (paresFormados === 2) {
+          gameOver = true;
+          clearInterval(cronometro);
+          document.getElementById('msg').innerHTML = "✅ Sensacional! Você encontrou os pares certos de tecnologia!" +
+            '<br><button onclick="next()">Avançar para Fase 5</button>';
+        }
+      } else {
+        a.style.border = b.style.border = '3px solid red';
+        setTimeout(() => {
+          a.style.border = b.style.border = '2px solid #fff';
+        }, 1000);
+      }
+      selecionados = [];
+    }
+  }
+
+  const timerDisplay = document.getElementById('timer');
+  const cronometro = setInterval(() => {
+    if (tempo > 0 && !gameOver) {
+      tempo--;
+      timerDisplay.textContent = `⏳ Tempo: ${tempo}`;
+    } else if (!gameOver) {
+      gameOver = true;
+      document.getElementById('msg').innerHTML = "⏱️ Tempo esgotado! Tente novamente a Fase 4.";
+    }
+  }, 1000);
+
+  function next() {
+    window.location.href = "fase5.html";
+  }
+</script>
+
+</body>
+</html>

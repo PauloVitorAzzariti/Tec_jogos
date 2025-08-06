@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Fase 7 – Classifique Hardware ou Software</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #141E30, #243B55);
+      color: white;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+    }
+
+    #itens {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 30px;
+      min-height: 120px;
+    }
+
+    .item {
+      padding: 12px 20px;
+      background: #00e5ff;
+      color: black;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: grab;
+      user-select: none;
+      transition: transform 0.2s ease;
+    }
+
+    .vibrar {
+      animation: vibrar 0.4s ease;
+    }
+
+    @keyframes vibrar {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+
+    .container-caixas {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .caixa {
+      border: 3px dashed white;
+      padding: 40px;
+      border-radius: 12px;
+      width: 300px;
+      min-height: 150px;
+      font-size: 18px;
+    }
+
+    .acerto {
+      background: #00c853;
+      color: white;
+    }
+
+    #popup {
+      display: none;
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      padding: 25px 30px;
+      border-radius: 12px;
+      font-size: 18px;
+      max-width: 400px;
+      z-index: 999;
+      box-shadow: 0 0 20px #000;
+    }
+
+    #popup button {
+      margin-top: 15px;
+      padding: 8px 20px;
+      border: none;
+      background: #ff1744;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #proximo {
+      display: none;
+      margin-top: 30px;
+      padding: 10px 25px;
+      background: #00e676;
+      color: #000;
+      border: none;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #proximo:hover {
+      background: #00c853;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🧠 Fase 7 – Classifique apenas Hardware e Software</h1>
+
+<div id="itens"></div>
+
+<div class="container-caixas">
+  <div class="caixa" id="hardware" ondragover="permitirSoltar(event)" ondrop="soltar(event, 'hardware')">
+    🖥️ Área de Hardware
+  </div>
+
+  <div class="caixa" id="software" ondragover="permitirSoltar(event)" ondrop="soltar(event, 'software')">
+    💾 Área de Software
+  </div>
+</div>
+
+<div id="popup">
+  <div id="mensagem"></div>
+  <button onclick="fecharPopup()">Fechar</button>
+</div>
+
+<button id="proximo" onclick="next()">Avançar para Fase 8</button>
+
+<script>
+  const listaItens = [
+    { nome: "Teclado", tipo: "hardware" },
+    { nome: "Mouse", tipo: "hardware" },
+    { nome: "Monitor", tipo: "hardware" },
+    { nome: "CPU", tipo: "hardware" },
+    { nome: "Placa-mãe", tipo: "hardware" },
+    { nome: "Word", tipo: "software" },
+    { nome: "Excel", tipo: "software" },
+    { nome: "Chrome", tipo: "software" },
+    { nome: "PowerPoint", tipo: "software" },
+    { nome: "Camiseta", tipo: "nenhum" },
+    { nome: "Martelo", tipo: "nenhum" },
+    { nome: "Banana", tipo: "nenhum" },
+    { nome: "Chave de fenda", tipo: "nenhum" },
+    { nome: "Sapato", tipo: "nenhum" },
+    { nome: "Pão", tipo: "nenhum" }
+  ];
+
+  let acertos = 0;
+  const totalCorretos = 9;
+  const itensDiv = document.getElementById("itens");
+
+  listaItens.sort(() => 0.5 - Math.random());
+
+  listaItens.forEach(item => {
+    const el = document.createElement('div');
+    el.className = "item";
+    el.textContent = item.nome;
+    el.setAttribute("draggable", true);
+    el.dataset.tipo = item.tipo;
+
+    el.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("nome", item.nome);
+      e.dataTransfer.setData("tipo", item.tipo);
+    });
+
+    itensDiv.appendChild(el);
+  });
+
+  function permitirSoltar(e) {
+    e.preventDefault();
+  }
+
+  function soltar(e, tipoAlvo) {
+    e.preventDefault();
+    const nome = e.dataTransfer.getData("nome");
+    const tipo = e.dataTransfer.getData("tipo");
+
+    const elOriginal = Array.from(document.querySelectorAll('.item'))
+      .find(el => el.textContent === nome && !el.classList.contains("acerto"));
+    if (!elOriginal) return;
+
+    if (tipo === "nenhum") {
+      mostrarPopup("❌ Este item não pertence a nenhuma das categorias. Ignore.");
+      animarErro(elOriginal);
+      return;
+    }
+
+    if (tipo === tipoAlvo) {
+      const novo = document.createElement("div");
+      novo.className = "item acerto";
+      novo.textContent = nome;
+      document.getElementById(tipoAlvo).appendChild(novo);
+      acertos++;
+      elOriginal.remove();
+      verificarAcertos();
+    } else {
+      const dica = tipoAlvo === "hardware"
+        ? "❌ Esse objeto não é um hardware!<br><br>💡 <strong>Hardware</strong> é a parte física do computador: peças como teclado, mouse e monitor."
+        : "❌ Esse objeto não é um software!<br><br>💡 <strong>Software</strong> são os programas que rodam no computador: como Word, Excel, e navegadores.";
+      mostrarPopup(dica);
+      animarErro(elOriginal);
+    }
+  }
+
+  function animarErro(el) {
+    el.classList.add("vibrar");
+    setTimeout(() => {
+      el.classList.remove("vibrar");
+    }, 600);
+  }
+
+  function mostrarPopup(mensagem) {
+    document.getElementById("mensagem").innerHTML = mensagem;
+    document.getElementById("popup").style.display = "block";
+  }
+
+  function fecharPopup() {
+    document.getElementById("popup").style.display = "none";
+  }
+
+  function verificarAcertos() {
+    if (acertos >= totalCorretos) {
+      mostrarPopup("✅ Parabéns! Você classificou todos os itens corretamente!");
+      document.getElementById("proximo").style.display = "inline-block";
+    }
+  }
+
+  function next() {
+    window.location.href = "fase8.html";
+  }
+</script>
+
+</body>
+</html>

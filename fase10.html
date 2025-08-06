@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Fase 10 – Montagem Final</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #232526, #414345);
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      color: #fff;
+    }
+
+    h1 {
+      margin: 30px 0 10px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #pc-estrutura {
+      margin: 20px 0;
+      border: 3px dashed #fff;
+      width: 400px;
+      height: 250px;
+      position: relative;
+      background: #333;
+      border-radius: 12px;
+    }
+
+    .slot {
+      width: 120px;
+      height: 40px;
+      border: 2px solid #00e676;
+      margin: 10px auto;
+      line-height: 40px;
+      border-radius: 8px;
+      background: #000;
+    }
+
+    .itens {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px;
+    }
+
+    .item {
+      background: #00bcd4;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: grab;
+      font-weight: bold;
+    }
+
+    #mensagem {
+      margin-top: 20px;
+      font-size: 18px;
+      min-height: 24px;
+    }
+
+    .popup {
+      display: none;
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      color: black;
+      padding: 20px;
+      border-radius: 12px;
+      z-index: 999;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    }
+
+    .popup button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      background: #ff5722;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #finalizar {
+      display: none;
+      margin-top: 20px;
+      padding: 12px 30px;
+      background: #00e676;
+      color: #000;
+      border: none;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🛠️ Fase 10 – Monte o Computador</h1>
+<p>Arraste os itens corretos para montar seu PC! Coloque somente os componentes reais de hardware.</p>
+
+<div class="container">
+  <div id="pc-estrutura">
+    <div class="slot" data-correto="Placa-Mãe">Slot 1</div>
+    <div class="slot" data-correto="CPU">Slot 2</div>
+    <div class="slot" data-correto="Memória RAM">Slot 3</div>
+  </div>
+
+  <div class="itens">
+    <div class="item" draggable="true">Placa-Mãe</div>
+    <div class="item" draggable="true">Memória RAM</div>
+    <div class="item" draggable="true">CPU</div>
+    <div class="item" draggable="true">Chocolate</div>
+    <div class="item" draggable="true">Banana</div>
+    <div class="item" draggable="true">Martelo</div>
+  </div>
+</div>
+
+<div id="mensagem"></div>
+<button id="finalizar" onclick="finalizar()">Finalizar Missão</button>
+
+<div class="popup" id="popup">
+  <div id="popup-texto"></div>
+  <button onclick="fecharPopup()">OK, Entendi</button>
+</div>
+
+<script>
+  let slotsCorretos = 0;
+
+  document.querySelectorAll('.item').forEach(item => {
+    item.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', item.textContent);
+    });
+  });
+
+  document.querySelectorAll('.slot').forEach(slot => {
+    slot.addEventListener('dragover', e => e.preventDefault());
+    slot.addEventListener('drop', e => {
+      e.preventDefault();
+      const data = e.dataTransfer.getData('text/plain');
+      const correto = slot.getAttribute('data-correto');
+
+      if (data === correto) {
+        slot.textContent = data;
+        slot.style.background = "#00e676";
+        slot.style.color = "#000";
+        slot.setAttribute('data-correto', 'feito');
+        slotsCorretos++;
+        checkFinal();
+      } else {
+        mostrarPopup(`❌ <strong>${data}</strong> não é um componente de hardware necessário.<br><br>Dica: Apenas componentes reais de computador devem ser arrastados para os slots.`);
+      }
+    });
+  });
+
+  function mostrarPopup(msg) {
+    const popup = document.getElementById("popup");
+    document.getElementById("popup-texto").innerHTML = msg;
+    popup.style.display = "block";
+  }
+
+  function fecharPopup() {
+    document.getElementById("popup").style.display = "none";
+  }
+
+  function checkFinal() {
+    if (slotsCorretos >= 3) {
+      document.getElementById("mensagem").textContent = "✅ Você montou seu computador com sucesso!";
+      document.getElementById("finalizar").style.display = "inline-block";
+    }
+  }
+
+  function finalizar() {
+    window.location.href = "final.html";
+  }
+</script>
+
+</body>
+</html>

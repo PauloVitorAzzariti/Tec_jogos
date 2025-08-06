@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Tech Quest – Fase 5</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(to bottom, #000428, #004e92);
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+      color: #fff;
+    }
+    .scene {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 40px;
+      box-sizing: border-box;
+    }
+    .portao {
+      width: 300px;
+      height: 300px;
+      background: #222;
+      border: 5px solid #0ff;
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .portao:hover {
+      background-color: #0ff;
+      color: #000;
+    }
+    .text-box {
+      background: rgba(0,0,0,0.7);
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 18px;
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .input {
+      margin-top: 20px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      width: 80%;
+      max-width: 300px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      background: #00e676;
+      color: #000;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #00c853;
+    }
+  </style>
+</head>
+<body>
+
+<div class="scene">
+  <div class="portao" onclick="focarInput()">
+    🔐 Portão da Tecnologia <br> (Digite a senha correta para abrir)
+  </div>
+  <div class="input">
+    <input type="text" id="resposta" placeholder="Digite a resposta aqui">
+    <br>
+    <button onclick="verificar()">Desbloquear</button>
+  </div>
+  <div class="text-box" id="msg">
+    🤖 <strong>Fase 5 - Enigma do Portão Futurista</strong><br>
+    Para abrir o portão e avançar, responda corretamente:<br><br>
+    <em>Sou invisível, mas essencial. Não posso ser tocado, mas sem mim, nenhum hardware funciona. Quem sou eu?</em>
+  </div>
+</div>
+
+<script>
+  function focarInput() {
+    document.getElementById("resposta").focus();
+  }
+
+  function verificar() {
+    const resposta = document.getElementById("resposta").value.trim().toLowerCase();
+    if (resposta === "software") {
+      document.getElementById("msg").innerHTML = "✅ Correto! O portão foi aberto e você pode continuar sua jornada!" +
+        '<br><button onclick="next()">Avançar para Fase 6</button>';
+    } else {
+      document.getElementById("msg").innerHTML = "❌ Resposta incorreta. Tente novamente!<br><em>Dica: Sem mim, os programas não funcionam.</em>";
+    }
+  }
+
+  function next() {
+    window.location.href = "fase6.html";
+  }
+</script>
+
+</body>
+</html>

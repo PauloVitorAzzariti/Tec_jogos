@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Tech Quest – Fase 1</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(to bottom right, #1e1e1e, #2c3e50);
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+      color: #fff;
+    }
+    .scene {
+      perspective: 800px;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 30px;
+      padding: 40px;
+      box-sizing: border-box;
+    }
+    .object {
+      width: 90px;
+      height: 90px;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: rotate 6s infinite linear;
+      cursor: pointer;
+    }
+    .face {
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      background: #4caf50;
+      border: 2px solid #fff;
+      opacity: 0.95;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      font-weight: bold;
+      text-align: center;
+      padding: 5px;
+    }
+    .front  { transform: rotateY(0deg) translateZ(45px); }
+    .back   { transform: rotateY(180deg) translateZ(45px); }
+    .right  { transform: rotateY(90deg) translateZ(45px); }
+    .left   { transform: rotateY(-90deg) translateZ(45px); }
+    .top    { transform: rotateX(90deg) translateZ(45px); }
+    .bottom { transform: rotateX(-90deg) translateZ(45px); }
+
+    @keyframes rotate {
+      from { transform: rotateX(0deg) rotateY(0deg); }
+      to   { transform: rotateX(360deg) rotateY(360deg); }
+    }
+
+    .text-box {
+      position: absolute;
+      bottom: 30px;
+      background: rgba(0,0,0,0.7);
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 18px;
+      width: 80%;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .timer {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      background: #000;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 20px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      background: #ff5722;
+      color: #fff;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #e64a19;
+    }
+  </style>
+</head>
+<body>
+
+<div class="timer" id="timer">⏳ Tempo: 60</div>
+<div class="scene" id="gameScene"></div>
+
+<div class="text-box" id="msg">
+  👋 Olá, explorador! Eu sou o <strong>Professor Chip</strong>. Entre os 20 objetos abaixo, apenas <strong>3 são relacionados à tecnologia (Hardware ou Software)</strong>. Encontre-os antes que o tempo acabe!
+</div>
+
+<script>
+  const distratores = [
+    'Camisa', 'Banana', 'Martelo', 'Tesoura', 'Bola', 'Óculos', 'Pão', 'Árvore', 'Relógio', 'Chave',
+    'Cadeira', 'Mesa', 'Garrafa', 'Brinquedo', 'Sapato', 'Livro', 'Janela'
+  ];
+
+  const corretos = [
+    { nome: 'Teclado', tipo: 'Hardware' },
+    { nome: 'Mouse', tipo: 'Hardware' },
+    { nome: 'Word', tipo: 'Software' }
+  ];
+
+  let todos = [...corretos.map(i => ({ ...i })), ...distratores.map(n => ({ nome: n, tipo: 'Outro' }))];
+  todos = todos.sort(() => Math.random() - 0.5);
+
+  const container = document.getElementById('gameScene');
+  let acertos = 0;
+  let tempo = 60;
+  let gameOver = false;
+
+  todos.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'object';
+    el.onclick = () => check(item.tipo, el);
+    el.innerHTML = `
+      <div class="face front">${item.nome}</div>
+      <div class="face back">${item.nome}</div>
+      <div class="face right">${item.nome}</div>
+      <div class="face left">${item.nome}</div>
+      <div class="face top">${item.nome}</div>
+      <div class="face bottom">${item.nome}</div>
+    `;
+    container.appendChild(el);
+  });
+
+  const timerDisplay = document.getElementById('timer');
+  const cronometro = setInterval(() => {
+    if (tempo > 0 && !gameOver) {
+      tempo--;
+      timerDisplay.textContent = `⏳ Tempo: ${tempo}`;
+    } else if (!gameOver) {
+      gameOver = true;
+      clearInterval(cronometro);
+      document.getElementById('msg').innerHTML = "⏱️ Tempo esgotado! Tente novamente a Fase 1.";
+    }
+  }, 1000);
+
+  function check(tipo, el) {
+    if (gameOver) return;
+    if (tipo === 'Hardware' || tipo === 'Software') {
+      acertos++;
+      el.style.border = '3px solid lime';
+      el.style.animation = 'none';
+      el.onclick = null;
+      if (acertos === 3) {
+        gameOver = true;
+        clearInterval(cronometro);
+        document.getElementById('msg').innerHTML = "✅ Parabéns! Você encontrou todos os itens corretos!" +
+          '<br><button onclick="next()">Avançar para Fase 2</button>';
+      }
+    } else {
+      el.style.border = '3px solid red';
+    }
+  }
+
+  function next() {
+    window.location.href = "fase2.html";
+  }
+</script>
+
+</body>
+</html>

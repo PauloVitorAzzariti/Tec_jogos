@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Fase 8 – Jogo da Memória</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #2c3e50, #34495e);
+      margin: 0;
+      padding: 20px;
+      color: white;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .tabuleiro {
+      display: grid;
+      grid-template-columns: repeat(4, 120px);
+      justify-content: center;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .carta {
+      background: #00e5ff;
+      border-radius: 10px;
+      height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      cursor: pointer;
+      color: black;
+      transition: transform 0.3s ease;
+      user-select: none;
+      font-size: 14px;
+    }
+
+    .carta.revelada {
+      background: #00c853;
+      color: white;
+      cursor: default;
+    }
+
+    #mensagem {
+      margin-top: 20px;
+      font-size: 20px;
+      min-height: 30px;
+    }
+
+    #proximo {
+      display: none;
+      margin-top: 20px;
+      padding: 10px 25px;
+      background: #00e676;
+      color: #000;
+      border: none;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #proximo:hover {
+      background: #00c853;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🧠 Fase 8 – Combine os Itens à Categoria Correta</h1>
+
+<div class="tabuleiro" id="tabuleiro"></div>
+
+<div id="mensagem"></div>
+<button id="proximo" onclick="next()">Avançar para Fase 9</button>
+
+<script>
+  const pares = [
+    { nome: "Teclado", tipo: "Hardware" },
+    { nome: "Mouse", tipo: "Hardware" },
+    { nome: "Monitor", tipo: "Hardware" },
+    { nome: "Word", tipo: "Software" },
+    { nome: "Excel", tipo: "Software" },
+    { nome: "Chrome", tipo: "Software" }
+  ];
+
+  let cartas = [];
+
+  // Cria pares duplicados (item + categoria)
+  pares.forEach(p => {
+    cartas.push({ texto: p.nome, id: p.nome, tipo: p.tipo });
+    cartas.push({ texto: p.tipo, id: p.nome + "_categoria", tipo: p.tipo });
+  });
+
+  cartas = cartas.sort(() => 0.5 - Math.random()); // embaralhar
+
+  const tabuleiro = document.getElementById("tabuleiro");
+  const mensagem = document.getElementById("mensagem");
+  let cartaVirada1 = null;
+  let cartaVirada2 = null;
+  let bloqueado = false;
+  let acertos = 0;
+
+  cartas.forEach((cartaObj, index) => {
+    const div = document.createElement("div");
+    div.className = "carta";
+    div.dataset.texto = cartaObj.texto;
+    div.dataset.id = cartaObj.id;
+    div.dataset.tipo = cartaObj.tipo;
+    div.innerHTML = "?";
+
+    div.addEventListener("click", function () {
+      if (bloqueado || div.classList.contains("revelada")) return;
+
+      div.innerHTML = cartaObj.texto;
+      div.classList.add("revelada");
+
+      if (!cartaVirada1) {
+        cartaVirada1 = div;
+      } else {
+        cartaVirada2 = div;
+        bloqueado = true;
+
+        setTimeout(() => {
+          const id1 = cartaVirada1.dataset.id;
+          const id2 = cartaVirada2.dataset.id;
+          const tipo1 = cartaVirada1.dataset.tipo;
+          const tipo2 = cartaVirada2.dataset.tipo;
+
+          const match = (
+            (id1 === id2.replace("_categoria", "") || id2 === id1.replace("_categoria", "")) &&
+            tipo1 === tipo2
+          );
+
+          if (match) {
+            mensagem.innerHTML = "✅ Acertou!";
+            acertos++;
+            if (acertos === pares.length) {
+              mensagem.innerHTML = "🎉 Parabéns! Você concluiu a fase!";
+              document.getElementById("proximo").style.display = "inline-block";
+            }
+          } else {
+            mensagem.innerHTML = "❌ Não combinam. Tente novamente.";
+            cartaVirada1.innerHTML = "?";
+            cartaVirada1.classList.remove("revelada");
+            cartaVirada2.innerHTML = "?";
+            cartaVirada2.classList.remove("revelada");
+          }
+
+          cartaVirada1 = null;
+          cartaVirada2 = null;
+          bloqueado = false;
+        }, 1000);
+      }
+    });
+
+    tabuleiro.appendChild(div);
+  });
+
+  function next() {
+    window.location.href = "fase9.html";
+  }
+</script>
+
+</body>
+</html>
