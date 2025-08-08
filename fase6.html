@@ -2,44 +2,64 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tech Quest – Fase 6</title>
   <style>
+    :root{
+      --green:#00e676;
+      --green-dark:#00c853;
+      --bg1:#1a1a1a;
+      --bg2:#004d40;
+    }
+    *{box-sizing:border-box}
     body {
       margin: 0;
-      background: linear-gradient(to bottom, #1a1a1a, #004d40);
+      background: linear-gradient(to bottom, var(--bg1), var(--bg2));
       font-family: 'Segoe UI', sans-serif;
       color: #fff;
     }
-
     h1 {
       text-align: center;
-      margin-top: 20px;
+      margin: 16px 8px 8px;
     }
-
+    .topbar{
+      display:flex;
+      justify-content:center;
+      gap:24px;
+      align-items:center;
+      flex-wrap:wrap;
+      padding: 8px 16px 0;
+    }
+    .timer, .status {
+      font-weight:700;
+      padding: 8px 14px;
+      border:2px solid var(--green);
+      border-radius:10px;
+      background: rgba(255,255,255,.06);
+    }
     .container {
       display: flex;
       justify-content: space-around;
       align-items: flex-start;
-      padding: 40px;
+      padding: 24px;
+      gap: 24px;
       flex-wrap: wrap;
     }
-
     .itens, .gabinete {
       width: 45%;
+      min-width: 320px;
       min-height: 300px;
       padding: 20px;
-      border: 3px dashed #00e676;
+      border: 3px dashed var(--green);
       border-radius: 15px;
       background-color: rgba(255, 255, 255, 0.05);
     }
-
     .itens {
       display: flex;
       flex-wrap: wrap;
       gap: 15px;
       justify-content: center;
     }
-
     .item {
       padding: 15px 20px;
       background: #1de9b6;
@@ -48,44 +68,67 @@
       font-weight: bold;
       cursor: grab;
       user-select: none;
+      touch-action: none; /* importante p/ touch */
     }
-
     .gabinete {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       align-items: center;
+      position: relative;
     }
-
+    .gabinete p{
+      opacity:.8;
+      pointer-events:none; /* não bloqueia drop */
+      margin:0;
+    }
     .item.dragging {
       opacity: 0.5;
     }
-
     .feedback {
       text-align: center;
-      font-size: 20px;
-      margin-top: 20px;
+      font-size: 18px;
+      margin: 10px 12px 0;
+      min-height: 24px;
     }
-
+    .actions{
+      text-align:center;
+      margin: 16px 0 28px;
+    }
     button {
-      margin-top: 20px;
+      margin-top: 12px;
       padding: 10px 25px;
       font-size: 16px;
-      background: #00e676;
+      background: var(--green);
       color: #000;
       border: none;
       border-radius: 8px;
       cursor: pointer;
     }
+    button:hover { background: var(--green-dark); }
 
-    button:hover {
-      background: #00c853;
+    /* Elemento sendo arrastado via pointer (touch) */
+    .floating {
+      position: fixed;
+      left: 0; top: 0;
+      transform: translate(-9999px,-9999px);
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    @media (max-width: 900px){
+      .itens, .gabinete{ width:100%; }
     }
   </style>
 </head>
 <body>
 
   <h1>🛠️ Fase 6 – Monte o Computador Corretamente</h1>
+
+  <div class="topbar">
+    <div class="timer" id="timer">⏳ Tempo: 02:00</div>
+    <div class="status" id="status">Peças corretas: 0/4</div>
+  </div>
 
   <div class="container">
     <div class="itens" id="itens">
@@ -99,62 +142,238 @@
       <div class="item" draggable="true" data-correto="false">Copo</div>
     </div>
 
-    <div class="gabinete" id="gabinete" ondragover="permitirSoltar(event)" ondrop="soltar(event)">
+    <div class="gabinete" id="gabinete">
       <p>Arraste aqui os componentes corretos</p>
     </div>
   </div>
 
   <div class="feedback" id="feedback"></div>
 
-  <div style="text-align: center;">
-    <button id="proximo" style="display:none;" onclick="next()">Avançar para Fase 7</button>
+  <div class="actions">
+    <button id="retry" style="display:none;">Tentar novamente</button>
+    <button id="proximo" style="display:none;">Avançar para Fase 7</button>
   </div>
 
   <script>
-    const itens = document.querySelectorAll('.item');
-    const gabinete = document.getElementById('gabinete');
+    // =======================
+    // Config do Tempo
+    // =======================
+    const DURACAO_SEGUNDOS = 120; // 2 minutos (ajuste se quiser)
+    let tempoRestante = DURACAO_SEGUNDOS;
+    let timerId = null;
+
+    const timerEl = document.getElementById('timer');
+    const statusEl = document.getElementById('status');
     const feedback = document.getElementById('feedback');
+    const retryBtn = document.getElementById('retry');
+    const nextBtn  = document.getElementById('proximo');
+
+    const itensContainer = document.getElementById('itens');
+    const gabinete = document.getElementById('gabinete');
+
     let corretosSoltos = 0;
+    const totalCorretos = 4;
 
-    itens.forEach(item => {
-      item.addEventListener('dragstart', () => {
-        item.classList.add('dragging');
-      });
-      item.addEventListener('dragend', () => {
-        item.classList.remove('dragging');
-      });
-    });
-
-    function permitirSoltar(e) {
-      e.preventDefault();
+    function formatar(seg) {
+      const m = Math.floor(seg/60).toString().padStart(2,'0');
+      const s = (seg%60).toString().padStart(2,'0');
+      return `${m}:${s}`;
     }
 
-    function soltar(e) {
-      e.preventDefault();
-      const itemArrastado = document.querySelector('.dragging');
-      const correto = itemArrastado.getAttribute('data-correto') === 'true';
+    function atualizarTimer() {
+      timerEl.textContent = `⏳ Tempo: ${formatar(tempoRestante)}`;
+    }
+
+    function iniciarTimer() {
+      atualizarTimer();
+      timerId = setInterval(() => {
+        tempoRestante--;
+        atualizarTimer();
+        if (tempoRestante <= 0) {
+          clearInterval(timerId);
+          bloquearJogoPorTempo();
+        }
+      }, 1000);
+    }
+
+    function bloquearJogoPorTempo() {
+      feedback.textContent = "⛔ Tempo esgotado! Tente novamente.";
+      desabilitarArraste(true);
+      retryBtn.style.display = "inline-block";
+    }
+
+    function resetarFase() {
+      // Reset tempo e estado
+      clearInterval(timerId);
+      tempoRestante = DURACAO_SEGUNDOS;
+      iniciarTimer();
+
+      // Voltar peças para a área de itens
+      document.querySelectorAll('.item').forEach(el=>{
+        itensContainer.appendChild(el);
+      });
+
+      corretosSoltos = 0;
+      statusEl.textContent = `Peças corretas: ${corretosSoltos}/${totalCorretos}`;
+      feedback.textContent = "";
+      retryBtn.style.display = "none";
+      nextBtn.style.display = "none";
+      desabilitarArraste(false);
+    }
+
+    // =======================
+    // Drag & Drop (mouse)
+    // =======================
+    function habilitarDragNativo() {
+      const itens = document.querySelectorAll('.item');
+      itens.forEach(item => {
+        // mouse drag
+        item.addEventListener('dragstart', () => {
+          item.classList.add('dragging');
+        });
+        item.addEventListener('dragend', () => {
+          item.classList.remove('dragging');
+        });
+
+        // touch fallback ativado abaixo via pointer events
+      });
+
+      // Permitir drop via mouse
+      gabinete.addEventListener('dragover', (e) => e.preventDefault());
+      gabinete.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const itemArrastado = document.querySelector('.dragging');
+        if (!itemArrastado) return;
+        processarDrop(itemArrastado);
+      });
+    }
+
+    // =======================
+    // Fallback por Pointer (touch/telas interativas)
+    // =======================
+    let floating = null;        // elemento visual que segue o dedo
+    let origem = null;          // item original
+    let origemParent = null;    // container original
+
+    function dentroDoElemento(clientX, clientY, elem){
+      const r = elem.getBoundingClientRect();
+      return clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom;
+    }
+
+    function onPointerDown(e){
+      const target = e.target.closest('.item');
+      if (!target || target.getAttribute('data-disabled') === 'true') return;
+
+      // Em alguns navegadores, draggable conflita com pointer move. Desliga durante o fallback
+      target.setAttribute('draggable','false');
+
+      origem = target;
+      origemParent = target.parentElement;
+
+      // criar "floating" que segue o dedo
+      floating = target.cloneNode(true);
+      floating.classList.add('floating');
+      document.body.appendChild(floating);
+
+      target.classList.add('dragging'); // mesmo estilo visual
+      moverFloating(e.clientX, e.clientY);
+
+      // capturar ponteiro para receber move/up mesmo fora do elemento
+      target.setPointerCapture?.(e.pointerId);
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerUp, { once:true });
+    }
+
+    function moverFloating(x, y){
+      if (!floating) return;
+      const rect = floating.getBoundingClientRect();
+      const offsetX = rect.width/2;
+      const offsetY = rect.height/2;
+      floating.style.transform = `translate(${x - offsetX}px, ${y - offsetY}px)`;
+    }
+
+    function onPointerMove(e){
+      moverFloating(e.clientX, e.clientY);
+    }
+
+    function onPointerUp(e){
+      // verificar drop no gabinete
+      const caiuNoGabinete = dentroDoElemento(e.clientX, e.clientY, gabinete);
+
+      // limpar floating
+      floating?.remove();
+      floating = null;
+
+      origem.classList.remove('dragging');
+      origem.setAttribute('draggable','true'); // reativa drag nativo para mouse
+
+      if (caiuNoGabinete){
+        processarDrop(origem);
+      } else {
+        // volta pro lugar original
+        origemParent.appendChild(origem);
+      }
+
+      window.removeEventListener('pointermove', onPointerMove);
+    }
+
+    function processarDrop(item){
+      const correto = item.getAttribute('data-correto') === 'true';
 
       if (correto) {
-        if (!gabinete.contains(itemArrastado)) {
-          gabinete.appendChild(itemArrastado);
+        if (!gabinete.contains(item)) {
+          gabinete.appendChild(item);
           corretosSoltos++;
+          statusEl.textContent = `Peças corretas: ${corretosSoltos}/${totalCorretos}`;
         }
-
-        if (corretosSoltos === 4) {
-          feedback.innerHTML = "✅ Parabéns! Você montou corretamente o computador!";
-          document.getElementById("proximo").style.display = "inline-block";
+        feedback.textContent = "✅ Boa! Esse componente faz parte do PC.";
+        if (corretosSoltos === totalCorretos) {
+          feedback.textContent = "✅ Parabéns! Você montou corretamente o computador!";
+          nextBtn.style.display = "inline-block";
+          clearInterval(timerId);
+          desabilitarArraste(true);
         }
       } else {
-        feedback.innerHTML = "❌ Esse item não faz parte da montagem!";
-        setTimeout(() => {
-          feedback.innerHTML = "";
-        }, 2000);
+        feedback.textContent = "❌ Esse item não faz parte da montagem!";
+        // vibração leve (se suportado)
+        if (navigator.vibrate) navigator.vibrate(120);
+        setTimeout(() => { if(feedback.textContent.startsWith("❌")) feedback.textContent = ""; }, 1600);
       }
     }
 
-    function next() {
-      window.location.href = "fase7.html";
+    function desabilitarArraste(flag){
+      document.querySelectorAll('.item').forEach(el=>{
+        if (flag){
+          el.setAttribute('draggable','false');
+          el.setAttribute('data-disabled','true');
+          el.style.cursor = 'not-allowed';
+        } else {
+          el.setAttribute('draggable','true');
+          el.removeAttribute('data-disabled');
+          el.style.cursor = 'grab';
+        }
+      });
     }
+
+    // =======================
+    // Navegação
+    // =======================
+    nextBtn.addEventListener('click', ()=> window.location.href = "fase7.html");
+    retryBtn.addEventListener('click', resetarFase);
+
+    // =======================
+    // Inicialização
+    // =======================
+    function init(){
+      habilitarDragNativo();
+
+      // Ativa fallback por pointer (funciona em mouse e touch; útil em telas interativas)
+      document.addEventListener('pointerdown', onPointerDown);
+
+      iniciarTimer();
+      statusEl.textContent = `Peças corretas: ${corretosSoltos}/${totalCorretos}`;
+    }
+    init();
   </script>
 
 </body>
