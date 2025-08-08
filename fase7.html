@@ -12,120 +12,56 @@
       color: white;
       text-align: center;
     }
-
     h1 { margin: 16px 8px 8px; }
 
-    /* HUD */
-    #hud{
-      display:flex; gap:16px; justify-content:center; align-items:center; flex-wrap:wrap;
-      margin-top: 6px;
+    #hud{ display:flex; gap:16px; justify-content:center; align-items:center; flex-wrap:wrap; margin-top:6px; }
+    .pill{ border:2px solid #00e676; border-radius:10px; padding:8px 14px; background:rgba(255,255,255,.06); font-weight:700; }
+
+    #itens{
+      display:flex; justify-content:center; flex-wrap:wrap; gap:15px; margin-top:20px; min-height:120px; padding:0 12px;
     }
-    .pill{
-      border:2px solid #00e676;
-      border-radius:10px;
-      padding:8px 14px;
-      background: rgba(255,255,255,.06);
-      font-weight:700;
+    .item{
+      padding:12px 20px; background:#00e5ff; color:#000; border-radius:8px; font-weight:700;
+      cursor:grab; user-select:none; transition:transform .2s, opacity .2s; touch-action:none;
+    }
+    .item[draggable="false"]{ cursor:not-allowed; opacity:.8; }
+
+    .vibrar{ animation:vibrar .4s ease; }
+    @keyframes vibrar{
+      0%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-5px)}100%{transform:translateX(0)}
     }
 
-    #itens {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 15px;
-      margin-top: 20px;
-      min-height: 120px;
-      padding: 0 12px;
+    .container-caixas{ display:flex; justify-content:center; gap:40px; margin-top:30px; flex-wrap:wrap; padding:0 12px 12px; }
+    .caixa{
+      border:3px dashed #fff; padding:40px; border-radius:12px; width:300px; min-height:150px; font-size:18px; position:relative;
     }
+    .caixa > span{ pointer-events:none; opacity:.9; } /* texto não bloqueia toque */
 
-    .item {
-      padding: 12px 20px;
-      background: #00e5ff;
-      color: black;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: grab;
-      user-select: none;
-      transition: transform 0.2s ease, opacity .2s ease;
-      touch-action: none; /* melhora o arraste em telas interativas */
-    }
-    .item[draggable="false"]{ cursor:not-allowed; opacity:.7; }
+    .acerto{ background:#00c853; color:#fff; }
 
-    .vibrar {
-      animation: vibrar 0.4s ease;
-    }
-    @keyframes vibrar {
-      0% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      50% { transform: translateX(5px); }
-      75% { transform: translateX(-5px); }
-      100% { transform: translateX(0); }
-    }
-
-    .container-caixas {
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      margin-top: 30px;
-      flex-wrap: wrap;
-      padding: 0 12px 12px;
-    }
-
-    .caixa {
-      border: 3px dashed white;
-      padding: 40px;
-      border-radius: 12px;
-      width: 300px;
-      min-height: 150px;
-      font-size: 18px;
-    }
-
-    .acerto {
-      background: #00c853;
-      color: white;
-    }
-
-    #popup {
-      display: none;
-      position: fixed;
-      top: 30%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.9);
-      padding: 25px 30px;
-      border-radius: 12px;
-      font-size: 18px;
-      max-width: 420px;
-      z-index: 999;
-      box-shadow: 0 0 20px #000;
-      text-align:left;
+    /* Popup */
+    #popup{
+      display:none; position:fixed; top:30%; left:50%; transform:translate(-50%,-50%);
+      background:rgba(0,0,0,.9); padding:25px 30px; border-radius:12px; font-size:18px; max-width:420px; z-index:999;
+      box-shadow:0 0 20px #000; text-align:left;
     }
     #popup strong{ color:#00e5ff; }
-    #popup .actions{
-      display:flex; gap:10px; justify-content:flex-end; margin-top:14px;
-    }
-    #popup button {
-      padding: 8px 20px;
-      border: none;
-      background: #ff1744;
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+    #popup .actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:14px; }
+    #popup button{ padding:8px 20px; border:none; background:#ff1744; color:#fff; border-radius:6px; cursor:pointer; }
     #popup button.sec{ background:#00e676; color:#000; }
 
-    #proximo {
-      display: none;
-      margin: 26px 0 18px;
-      padding: 10px 25px;
-      background: #00e676;
-      color: #000;
-      border: none;
-      font-size: 16px;
-      border-radius: 8px;
-      cursor: pointer;
+    #proximo{ display:none; margin:26px 0 18px; padding:10px 25px; background:#00e676; color:#000; border:none; font-size:16px; border-radius:8px; cursor:pointer; }
+    #proximo:hover{ background:#00c853; }
+
+    /* Ghost que segue o dedo no fallback touch */
+    .floating{
+      position:fixed; left:0; top:0; transform:translate(-9999px,-9999px); z-index:9999; pointer-events:none;
+      padding:12px 20px; background:#00e5ff; color:#000; border-radius:8px; font-weight:700;
+      box-shadow:0 8px 24px rgba(0,0,0,.5);
     }
-    #proximo:hover { background: #00c853; }
+
+    /* Destaque das caixas quando o dedo está por cima */
+    .caixa.highlight{ outline:3px solid #00e676; outline-offset:4px; }
   </style>
 </head>
 <body>
@@ -140,12 +76,11 @@
 <div id="itens"></div>
 
 <div class="container-caixas">
-  <div class="caixa" id="hardware" ondragover="permitirSoltar(event)" ondrop="soltar(event, 'hardware')">
-    🖥️ Área de Hardware
+  <div class="caixa" id="hardware" ondragover="permitirSoltar(event)" ondrop="soltar(event,'hardware')">
+    <span>🖥️ Área de Hardware</span>
   </div>
-
-  <div class="caixa" id="software" ondragover="permitirSoltar(event)" ondrop="soltar(event, 'software')">
-    💾 Área de Software
+  <div class="caixa" id="software" ondragover="permitirSoltar(event)" ondrop="soltar(event,'software')">
+    <span>💾 Área de Software</span>
   </div>
 </div>
 
@@ -160,9 +95,7 @@
 <button id="proximo" onclick="next()">Avançar para Fase 8</button>
 
 <script>
-  // -------------------------
-  // Dados e estado
-  // -------------------------
+  // ---------- Dados ----------
   const listaItens = [
     { nome: "Teclado", tipo: "hardware" },
     { nome: "Mouse", tipo: "hardware" },
@@ -180,64 +113,47 @@
     { nome: "Sapato", tipo: "nenhum" },
     { nome: "Pão", tipo: "nenhum" }
   ];
-
-  let acertos = 0;
+  let acertos = 0, jogoEncerrado = false;
   const totalCorretos = 9;
-  let jogoEncerrado = false;
 
-  const itensDiv   = document.getElementById("itens");
-  const timerEl    = document.getElementById("timer");
+  const itensDiv = document.getElementById("itens");
+  const timerEl = document.getElementById("timer");
   const progressEl = document.getElementById("progress");
   const proximoBtn = document.getElementById("proximo");
   const btnTryAgain = document.getElementById("btnTryAgain");
+  const boxHardware = document.getElementById("hardware");
+  const boxSoftware = document.getElementById("software");
 
-  // -------------------------
-  // Cronômetro (1 minuto)
-  // -------------------------
-  const DURACAO = 60; // segundos
-  let restante = DURACAO;
-  let tId = null;
-
-  function fmt(seg) {
-    const m = String(Math.floor(seg/60)).padStart(2,'0');
-    const s = String(seg%60).padStart(2,'0');
-    return `${m}:${s}`;
-  }
-  function atualizarTimer(){
-    timerEl.textContent = `⏳ Tempo: ${fmt(restante)}`;
-  }
+  // ---------- Timer 1 min ----------
+  const DURACAO = 60; let restante = DURACAO; let tId = null;
+  const fmt = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  function atualizarTimer(){ timerEl.textContent = `⏳ Tempo: ${fmt(restante)}`; }
   function iniciarTimer(){
     atualizarTimer();
     tId = setInterval(()=>{
       if (jogoEncerrado) { clearInterval(tId); return; }
-      restante--;
-      atualizarTimer();
-      if (restante <= 0) {
-        clearInterval(tId);
-        tempoEsgotado();
-      }
+      restante--; atualizarTimer();
+      if (restante <= 0){ clearInterval(tId); tempoEsgotado(); }
     },1000);
   }
   function tempoEsgotado(){
-    jogoEncerrado = true;
-    bloquearArraste(true);
+    jogoEncerrado = true; bloquearArraste(true);
     if (navigator.vibrate) navigator.vibrate(200);
     mostrarPopup("⛔ <strong>Tempo esgotado!</strong> Você perdeu esta fase. Tente novamente.");
     btnTryAgain.style.display = "inline-block";
   }
 
-  // -------------------------
-  // Render itens (embaralhar)
-  // -------------------------
-  listaItens.sort(() => 0.5 - Math.random());
-  listaItens.forEach(item => {
+  // ---------- Render items ----------
+  listaItens.sort(()=>0.5 - Math.random());
+  listaItens.forEach(item=>{
     const el = document.createElement('div');
     el.className = "item";
     el.textContent = item.nome;
     el.setAttribute("draggable", true);
     el.dataset.tipo = item.tipo;
 
-    el.addEventListener("dragstart", e => {
+    // Drag nativo (mouse)
+    el.addEventListener("dragstart", e=>{
       if (jogoEncerrado) { e.preventDefault(); return; }
       e.dataTransfer.setData("nome", item.nome);
       e.dataTransfer.setData("tipo", item.tipo);
@@ -246,35 +162,32 @@
     itensDiv.appendChild(el);
   });
 
-  // -------------------------
-  // DnD
-  // -------------------------
-  function permitirSoltar(e) {
-    if (jogoEncerrado) return;
-    e.preventDefault();
-  }
-
-  function soltar(e, tipoAlvo) {
+  // ---------- DnD nativo (mouse) ----------
+  function permitirSoltar(e){ if (!jogoEncerrado) e.preventDefault(); }
+  function soltar(e, alvo){
     if (jogoEncerrado) return;
     e.preventDefault();
     const nome = e.dataTransfer.getData("nome");
     const tipo = e.dataTransfer.getData("tipo");
+    processarDrop(nome, tipo, alvo);
+  }
+  window.permitirSoltar = permitirSoltar;
+  window.soltar = soltar;
 
-    const elOriginal = Array.from(document.querySelectorAll('.item'))
-      .find(el => el.textContent === nome && !el.classList.contains("acerto"));
+  function processarDrop(nome, tipo, tipoAlvo){
+    const elOriginal = Array.from(document.querySelectorAll('.item')).find(el => el.textContent === nome && !el.classList.contains("acerto"));
     if (!elOriginal) return;
 
-    if (tipo === "nenhum") {
+    if (tipo === "nenhum"){
       mostrarPopup("❌ Este item não pertence a nenhuma das categorias. Ignore.");
       animarErro(elOriginal);
       return;
     }
-
-    if (tipo === tipoAlvo) {
+    if (tipo === tipoAlvo){
       const novo = document.createElement("div");
       novo.className = "item acerto";
       novo.textContent = nome;
-      document.getElementById(tipoAlvo).appendChild(novo);
+      (tipoAlvo === "hardware" ? boxHardware : boxSoftware).appendChild(novo);
       acertos++;
       progressEl.textContent = `Progresso: ${acertos}/${totalCorretos}`;
       elOriginal.remove();
@@ -288,54 +201,108 @@
     }
   }
 
-  // -------------------------
-  // UI helpers
-  // -------------------------
-  function animarErro(el) {
-    el.classList.add("vibrar");
-    if (navigator.vibrate) navigator.vibrate(120);
-    setTimeout(() => el.classList.remove("vibrar"), 600);
-  }
-
-  function mostrarPopup(mensagem) {
-    document.getElementById("mensagem").innerHTML = mensagem;
-    document.getElementById("popup").style.display = "block";
-  }
-  function fecharPopup() {
-    document.getElementById("popup").style.display = "none";
-  }
-  window.fecharPopup = fecharPopup; // mantém o onclick do HTML
-
-  function verificarAcertos() {
-    if (acertos >= totalCorretos) {
-      jogoEncerrado = true;
-      clearInterval(tId);
+  function verificarAcertos(){
+    if (acertos >= totalCorretos){
+      jogoEncerrado = true; clearInterval(tId); bloquearArraste(true);
       mostrarPopup("✅ Parabéns! Você classificou todos os itens corretamente!");
       proximoBtn.style.display = "inline-block";
-      bloquearArraste(true);
     }
   }
-
   function bloquearArraste(flag){
-    document.querySelectorAll('.item').forEach(el=>{
-      el.setAttribute('draggable', String(!flag));
-    });
+    document.querySelectorAll('.item').forEach(el=> el.setAttribute('draggable', String(!flag)));
+  }
+  function animarErro(el){
+    el.classList.add("vibrar"); if (navigator.vibrate) navigator.vibrate(120);
+    setTimeout(()=> el.classList.remove("vibrar"),600);
   }
 
-  function next() {
-    window.location.href = "fase8.html";
+  // ---------- Popup ----------
+  function mostrarPopup(msg){ document.getElementById("mensagem").innerHTML = msg; document.getElementById("popup").style.display="block"; }
+  function fecharPopup(){ document.getElementById("popup").style.display = "none"; }
+  window.fecharPopup = fecharPopup;
+  document.getElementById('btnTryAgain').addEventListener('click', ()=> location.reload());
+
+  function next(){ window.location.href = "fase8.html"; }
+  window.next = next;
+
+  // ---------- Fallback TOUCH (Pointer Events) ----------
+  let floating = null, origemEl = null, origemParent = null;
+  let hoverTarget = null;
+
+  // util: checa se ponto (x,y) está sobre o elem
+  function hit(elem, x, y){
+    const r = elem.getBoundingClientRect();
+    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
   }
-  window.next = next; // mantém o onclick do HTML
+  function clearHighlights(){
+    [boxHardware, boxSoftware].forEach(b=> b.classList.remove('highlight'));
+    hoverTarget = null;
+  }
 
-  // -------------------------
-  // Tentar novamente
-  // -------------------------
-  btnTryAgain.addEventListener('click', ()=> {
-    // reload simples garante reset da ordem e do tempo
-    location.reload();
-  });
+  document.addEventListener('pointerdown', (e)=>{
+    const item = e.target.closest('.item');
+    if (!item || jogoEncerrado) return;
 
-  // start
+    // desativa drag nativo durante o touch
+    item.setAttribute('draggable','false');
+
+    origemEl = item;
+    origemParent = item.parentElement;
+
+    floating = document.createElement('div');
+    floating.className = 'floating';
+    floating.textContent = item.textContent;
+    document.body.appendChild(floating);
+
+    moveFloating(e.clientX, e.clientY);
+    item.setPointerCapture?.(e.pointerId);
+    window.addEventListener('pointermove', onPointerMove, { passive:false });
+    window.addEventListener('pointerup', onPointerUp, { once:true });
+  }, { passive:true });
+
+  function moveFloating(x,y){
+    if (!floating) return;
+    const rect = floating.getBoundingClientRect();
+    const ox = rect.width/2, oy = rect.height/2;
+    floating.style.transform = `translate(${x-ox}px, ${y-oy}px)`;
+
+    // highlight de alvo
+    const overHardware = hit(boxHardware, x, y);
+    const overSoftware = hit(boxSoftware, x, y);
+    [boxHardware, boxSoftware].forEach(b=> b.classList.remove('highlight'));
+    if (overHardware){ boxHardware.classList.add('highlight'); hoverTarget = 'hardware'; }
+    else if (overSoftware){ boxSoftware.classList.add('highlight'); hoverTarget = 'software'; }
+    else { hoverTarget = null; }
+  }
+
+  function onPointerMove(e){
+    // impedir scroll/zoom durante o arraste
+    e.preventDefault();
+    moveFloating(e.clientX, e.clientY);
+  }
+
+  function onPointerUp(e){
+    window.removeEventListener('pointermove', onPointerMove);
+    floating?.remove(); floating = null;
+    clearHighlights();
+
+    // reativa drag nativo para mouse após o toque
+    origemEl?.setAttribute('draggable','true');
+
+    if (!origemEl) return;
+
+    if (hoverTarget){
+      const nome = origemEl.textContent;
+      const tipo = origemEl.dataset.tipo;
+      processarDrop(nome, tipo, hoverTarget);
+    } else {
+      // volta pro container original
+      origemParent?.appendChild(origemEl);
+    }
+    origemEl = origemParent = null;
+  }
+
+  // ---------- Init ----------
   iniciarTimer();
   progressEl.textContent = `Progresso: ${acertos}/${totalCorretos}`;
 </script>
