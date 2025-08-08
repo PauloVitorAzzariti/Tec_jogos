@@ -3,21 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <title>Fase 8 – Jogo da Memória</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
+    body{
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(to right, #2c3e50, #34495e);
-      margin: 0;
-      padding: 20px;
-      color: white;
-      text-align: center;
+      margin: 0; padding: 20px; color: #fff; text-align: center;
     }
+    h1{ margin-bottom: 20px; }
 
-    h1 {
-      margin-bottom: 20px;
-    }
-
-    .tabuleiro {
+    .tabuleiro{
       display: grid;
       grid-template-columns: repeat(4, 120px);
       justify-content: center;
@@ -25,47 +20,60 @@
       margin-top: 30px;
     }
 
-    .carta {
+    .carta{
       background: #00e5ff;
       border-radius: 10px;
-      height: 100px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-weight: bold;
-      cursor: pointer;
-      color: black;
-      transition: transform 0.3s ease;
-      user-select: none;
-      font-size: 14px;
+      height: 100px; display: flex; justify-content: center; align-items: center;
+      font-weight: bold; cursor: pointer; color: #000;
+      user-select: none; font-size: 14px;
+      transition: transform .25s ease, box-shadow .25s ease, background .25s ease, color .25s ease;
+      box-shadow: 0 6px 16px rgba(0,0,0,.25);
     }
 
-    .carta.revelada {
+    /* Destaque ao virar (antes de confirmar acerto/erro) */
+    .carta.virada{
+      box-shadow: 0 0 0 3px #00e5ff, 0 10px 24px rgba(0,229,255,.35);
+      transform: translateY(-4px);
+    }
+
+    /* Par confirmado */
+    .carta.match{
       background: #00c853;
-      color: white;
+      color: #fff;
       cursor: default;
+      box-shadow: 0 0 0 3px #00c853, 0 10px 26px rgba(0,200,83,.45);
+      transform: translateY(-2px) scale(1.02);
+      pointer-events: none;
     }
 
-    #mensagem {
-      margin-top: 20px;
-      font-size: 20px;
-      min-height: 30px;
+    /* Shake de erro */
+    .carta.erro{
+      animation: shake .35s ease;
+      box-shadow: 0 0 0 3px #ff5252, 0 10px 20px rgba(255,82,82,.35);
+      background: #ffd1d1;
+    }
+    @keyframes shake{
+      0%,100%{ transform: translateX(0) }
+      20%{ transform: translateX(-6px) }
+      40%{ transform: translateX(6px) }
+      60%{ transform: translateX(-5px) }
+      80%{ transform: translateX(5px) }
     }
 
-    #proximo {
-      display: none;
-      margin-top: 20px;
-      padding: 10px 25px;
-      background: #00e676;
-      color: #000;
-      border: none;
-      font-size: 16px;
-      border-radius: 8px;
-      cursor: pointer;
+    #mensagem{
+      margin-top: 20px; font-size: 20px; min-height: 30px;
     }
 
-    #proximo:hover {
-      background: #00c853;
+    #proximo{
+      display: none; margin-top: 20px; padding: 10px 25px;
+      background: #00e676; color: #000; border: none; font-size: 16px; border-radius: 8px; cursor: pointer;
+    }
+    #proximo:hover{ background: #00c853; }
+
+    /* Responsivo */
+    @media (max-width: 520px){
+      .tabuleiro{ grid-template-columns: repeat(3, 100px); }
+      .carta{ height: 86px; font-size: 13px; }
     }
   </style>
 </head>
@@ -75,7 +83,7 @@
 
 <div class="tabuleiro" id="tabuleiro"></div>
 
-<div id="mensagem"></div>
+<div id="mensagem" aria-live="polite"></div>
 <button id="proximo" onclick="next()">Avançar para Fase 9</button>
 
 <script>
@@ -88,82 +96,98 @@
     { nome: "Chrome", tipo: "Software" }
   ];
 
+  // Monta cartas com pairId e lado (item vs categoria)
   let cartas = [];
-
-  // Cria pares duplicados (item + categoria)
-  pares.forEach(p => {
-    cartas.push({ texto: p.nome, id: p.nome, tipo: p.tipo });
-    cartas.push({ texto: p.tipo, id: p.nome + "_categoria", tipo: p.tipo });
+  pares.forEach((p, i) => {
+    cartas.push({ texto: p.nome,   pairId: i, tipo: p.tipo, lado: "item" });
+    cartas.push({ texto: p.tipo,   pairId: i, tipo: p.tipo, lado: "categoria" });
   });
-
-  cartas = cartas.sort(() => 0.5 - Math.random()); // embaralhar
+  cartas.sort(() => 0.5 - Math.random());
 
   const tabuleiro = document.getElementById("tabuleiro");
-  const mensagem = document.getElementById("mensagem");
-  let cartaVirada1 = null;
-  let cartaVirada2 = null;
+  const mensagem  = document.getElementById("mensagem");
+  const btnNext   = document.getElementById("proximo");
+
+  let carta1 = null;
+  let carta2 = null;
   let bloqueado = false;
   let acertos = 0;
 
-  cartas.forEach((cartaObj, index) => {
+  // Cria e renderiza as cartas
+  cartas.forEach(c => {
     const div = document.createElement("div");
     div.className = "carta";
-    div.dataset.texto = cartaObj.texto;
-    div.dataset.id = cartaObj.id;
-    div.dataset.tipo = cartaObj.tipo;
-    div.innerHTML = "?";
+    div.textContent = "?";
 
-    div.addEventListener("click", function () {
-      if (bloqueado || div.classList.contains("revelada")) return;
+    // datasets
+    div.dataset.texto  = c.texto;
+    div.dataset.pairId = String(c.pairId);
+    div.dataset.lado   = c.lado;  // "item" ou "categoria"
+    div.dataset.tipo   = c.tipo;  // Hardware/Software
 
-      div.innerHTML = cartaObj.texto;
-      div.classList.add("revelada");
+    // clique
+    div.addEventListener("click", () => {
+      if (bloqueado) return;
+      if (div.classList.contains("match")) return;  // já acertada
+      if (div === carta1) return;                   // evita clicar a mesma
 
-      if (!cartaVirada1) {
-        cartaVirada1 = div;
+      // mostrar conteúdo e destacar
+      div.textContent = div.dataset.texto;
+      div.classList.add("virada");
+
+      if (!carta1) {
+        carta1 = div;
       } else {
-        cartaVirada2 = div;
+        carta2 = div;
         bloqueado = true;
 
         setTimeout(() => {
-          const id1 = cartaVirada1.dataset.id;
-          const id2 = cartaVirada2.dataset.id;
-          const tipo1 = cartaVirada1.dataset.tipo;
-          const tipo2 = cartaVirada2.dataset.tipo;
-
-          const match = (
-            (id1 === id2.replace("_categoria", "") || id2 === id1.replace("_categoria", "")) &&
-            tipo1 === tipo2
-          );
+          const match =
+            carta1.dataset.pairId === carta2.dataset.pairId &&
+            carta1.dataset.lado   !== carta2.dataset.lado;
 
           if (match) {
-            mensagem.innerHTML = "✅ Acertou!";
+            mensagem.textContent = "✅ Acertou!";
+            carta1.classList.remove("virada");
+            carta2.classList.remove("virada");
+            carta1.classList.add("match");
+            carta2.classList.add("match");
+
+            // trava o par (sem pointer)
+            carta1.style.pointerEvents = "none";
+            carta2.style.pointerEvents = "none";
+
             acertos++;
             if (acertos === pares.length) {
-              mensagem.innerHTML = "🎉 Parabéns! Você concluiu a fase!";
-              document.getElementById("proximo").style.display = "inline-block";
+              mensagem.textContent = "🎉 Parabéns! Você concluiu a fase!";
+              btnNext.style.display = "inline-block";
             }
           } else {
-            mensagem.innerHTML = "❌ Não combinam. Tente novamente.";
-            cartaVirada1.innerHTML = "?";
-            cartaVirada1.classList.remove("revelada");
-            cartaVirada2.innerHTML = "?";
-            cartaVirada2.classList.remove("revelada");
+            mensagem.textContent = "❌ Não combinam. Tente novamente.";
+            if (navigator.vibrate) navigator.vibrate(120);
+            // efeito erro
+            carta1.classList.add("erro");
+            carta2.classList.add("erro");
+
+            setTimeout(() => {
+              carta1.classList.remove("virada", "erro");
+              carta2.classList.remove("virada", "erro");
+              carta1.textContent = "?";
+              carta2.textContent = "?";
+            }, 350);
           }
 
-          cartaVirada1 = null;
-          cartaVirada2 = null;
+          carta1 = null;
+          carta2 = null;
           bloqueado = false;
-        }, 1000);
+        }, 450);
       }
     });
 
     tabuleiro.appendChild(div);
   });
 
-  function next() {
-    window.location.href = "fase9.html";
-  }
+  function next(){ window.location.href = "fase9.html"; }
 </script>
 
 </body>
