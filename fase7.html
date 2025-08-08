@@ -5,63 +5,28 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Fase 7 – Classifique Hardware ou Software</title>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #141E30, #243B55);
-      color: white;
-      text-align: center;
-    }
-    h1 { margin: 16px 8px 8px; }
-
-    #hud{ display:flex; gap:16px; justify-content:center; align-items:center; flex-wrap:wrap; margin-top:6px; }
-    .pill{ border:2px solid #00e676; border-radius:10px; padding:8px 14px; background:rgba(255,255,255,.06); font-weight:700; }
-
-    #itens{
-      display:flex; justify-content:center; flex-wrap:wrap; gap:15px; margin-top:20px; min-height:120px; padding:0 12px;
-    }
-    .item{
-      padding:12px 20px; background:#00e5ff; color:#000; border-radius:8px; font-weight:700;
-      cursor:grab; user-select:none; transition:transform .2s, opacity .2s; touch-action:none;
-    }
-    .item[draggable="false"]{ cursor:not-allowed; opacity:.8; }
-
-    .vibrar{ animation:vibrar .4s ease; }
-    @keyframes vibrar{
-      0%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-5px)}100%{transform:translateX(0)}
-    }
-
-    .container-caixas{ display:flex; justify-content:center; gap:40px; margin-top:30px; flex-wrap:wrap; padding:0 12px 12px; }
-    .caixa{
-      border:3px dashed #fff; padding:40px; border-radius:12px; width:300px; min-height:150px; font-size:18px; position:relative;
-    }
-    .caixa > span{ pointer-events:none; opacity:.9; } /* texto não bloqueia toque */
-
-    .acerto{ background:#00c853; color:#fff; }
-
-    /* Popup */
-    #popup{
-      display:none; position:fixed; top:30%; left:50%; transform:translate(-50%,-50%);
-      background:rgba(0,0,0,.9); padding:25px 30px; border-radius:12px; font-size:18px; max-width:420px; z-index:999;
-      box-shadow:0 0 20px #000; text-align:left;
-    }
-    #popup strong{ color:#00e5ff; }
-    #popup .actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:14px; }
-    #popup button{ padding:8px 20px; border:none; background:#ff1744; color:#fff; border-radius:6px; cursor:pointer; }
-    #popup button.sec{ background:#00e676; color:#000; }
-
-    #proximo{ display:none; margin:26px 0 18px; padding:10px 25px; background:#00e676; color:#000; border:none; font-size:16px; border-radius:8px; cursor:pointer; }
-    #proximo:hover{ background:#00c853; }
-
-    /* Ghost que segue o dedo no fallback touch */
-    .floating{
-      position:fixed; left:0; top:0; transform:translate(-9999px,-9999px); z-index:9999; pointer-events:none;
-      padding:12px 20px; background:#00e5ff; color:#000; border-radius:8px; font-weight:700;
-      box-shadow:0 8px 24px rgba(0,0,0,.5);
-    }
-
-    /* Destaque das caixas quando o dedo está por cima */
-    .caixa.highlight{ outline:3px solid #00e676; outline-offset:4px; }
+    body{margin:0;font-family:'Segoe UI',sans-serif;background:linear-gradient(to right,#141E30,#243B55);color:#fff;text-align:center}
+    h1{margin:16px 8px 8px}
+    #hud{display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:6px}
+    .pill{border:2px solid #00e676;border-radius:10px;padding:8px 14px;background:rgba(255,255,255,.06);font-weight:700}
+    #itens{display:flex;justify-content:center;flex-wrap:wrap;gap:15px;margin-top:20px;min-height:120px;padding:0 12px}
+    .item{padding:12px 20px;background:#00e5ff;color:#000;border-radius:8px;font-weight:700;cursor:grab;user-select:none;transition:transform .2s,opacity .2s;touch-action:none}
+    .item[draggable="false"]{cursor:not-allowed;opacity:.85}
+    .vibrar{animation:vibrar .4s ease}
+    @keyframes vibrar{0%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-5px)}100%{transform:translateX(0)}}
+    .container-caixas{display:flex;justify-content:center;gap:40px;margin-top:30px;flex-wrap:wrap;padding:0 12px 12px}
+    .caixa{border:3px dashed #fff;padding:40px;border-radius:12px;width:300px;min-height:150px;font-size:18px;position:relative}
+    .caixa>span{pointer-events:none;opacity:.9}
+    .caixa.highlight{outline:3px solid #00e676;outline-offset:4px}
+    .acerto{background:#00c853;color:#fff}
+    #popup{display:none;position:fixed;top:30%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.9);padding:25px 30px;border-radius:12px;font-size:18px;max-width:420px;z-index:999;box-shadow:0 0 20px #000;text-align:left}
+    #popup strong{color:#00e5ff}
+    #popup .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+    #popup button{padding:8px 20px;border:none;background:#ff1744;color:#fff;border-radius:6px;cursor:pointer}
+    #popup button.sec{background:#00e676;color:#000}
+    #proximo{display:none;margin:26px 0 18px;padding:10px 25px;background:#00e676;color:#000;border:none;font-size:16px;border-radius:8px;cursor:pointer}
+    #proximo:hover{background:#00c853}
+    .floating{position:fixed;left:0;top:0;transform:translate(-9999px,-9999px);z-index:9999;pointer-events:none;padding:12px 20px;background:#00e5ff;color:#000;border-radius:8px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.5)}
   </style>
 </head>
 <body>
@@ -76,10 +41,10 @@
 <div id="itens"></div>
 
 <div class="container-caixas">
-  <div class="caixa" id="hardware" ondragover="permitirSoltar(event)" ondrop="soltar(event,'hardware')">
+  <div class="caixa" id="hardware" ondragover="permitirSoltar(event)" ondrop="dropMouse(event,'hardware')">
     <span>🖥️ Área de Hardware</span>
   </div>
-  <div class="caixa" id="software" ondragover="permitirSoltar(event)" ondrop="soltar(event,'software')">
+  <div class="caixa" id="software" ondragover="permitirSoltar(event)" ondrop="dropMouse(event,'software')">
     <span>💾 Área de Software</span>
   </div>
 </div>
@@ -95,7 +60,7 @@
 <button id="proximo" onclick="next()">Avançar para Fase 8</button>
 
 <script>
-  // ---------- Dados ----------
+  // ----- Dados -----
   const listaItens = [
     { nome: "Teclado", tipo: "hardware" },
     { nome: "Mouse", tipo: "hardware" },
@@ -113,137 +78,116 @@
     { nome: "Sapato", tipo: "nenhum" },
     { nome: "Pão", tipo: "nenhum" }
   ];
-  let acertos = 0, jogoEncerrado = false;
   const totalCorretos = 9;
+  let acertos = 0, jogoEncerrado = false;
 
   const itensDiv = document.getElementById("itens");
-  const timerEl = document.getElementById("timer");
+  const boxHardware = document.getElementById("hardware");
+  const boxSoftware = document.getElementById("software");
   const progressEl = document.getElementById("progress");
   const proximoBtn = document.getElementById("proximo");
   const btnTryAgain = document.getElementById("btnTryAgain");
-  const boxHardware = document.getElementById("hardware");
-  const boxSoftware = document.getElementById("software");
 
-  // ---------- Timer 1 min ----------
+  // ----- Timer 1 min -----
   const DURACAO = 60; let restante = DURACAO; let tId = null;
+  const timerEl = document.getElementById("timer");
   const fmt = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
   function atualizarTimer(){ timerEl.textContent = `⏳ Tempo: ${fmt(restante)}`; }
   function iniciarTimer(){
     atualizarTimer();
-    tId = setInterval(()=>{
-      if (jogoEncerrado) { clearInterval(tId); return; }
+    tId = setInterval(()=>{ if(jogoEncerrado){clearInterval(tId);return}
       restante--; atualizarTimer();
-      if (restante <= 0){ clearInterval(tId); tempoEsgotado(); }
+      if(restante<=0){ clearInterval(tId); tempoEsgotado(); }
     },1000);
   }
   function tempoEsgotado(){
-    jogoEncerrado = true; bloquearArraste(true);
-    if (navigator.vibrate) navigator.vibrate(200);
+    jogoEncerrado = true; bloquearTodos(true);
+    if(navigator.vibrate) navigator.vibrate(200);
     mostrarPopup("⛔ <strong>Tempo esgotado!</strong> Você perdeu esta fase. Tente novamente.");
     btnTryAgain.style.display = "inline-block";
   }
 
-  // ---------- Render items ----------
+  // ----- Render -----
   listaItens.sort(()=>0.5 - Math.random());
-  listaItens.forEach(item=>{
+  listaItens.forEach(d=>{
     const el = document.createElement('div');
     el.className = "item";
-    el.textContent = item.nome;
-    el.setAttribute("draggable", true);
-    el.dataset.tipo = item.tipo;
-
-    // Drag nativo (mouse)
-    el.addEventListener("dragstart", e=>{
-      if (jogoEncerrado) { e.preventDefault(); return; }
-      e.dataTransfer.setData("nome", item.nome);
-      e.dataTransfer.setData("tipo", item.tipo);
-    });
-
+    el.textContent = d.nome;
+    el.dataset.tipo = d.tipo;
+    el.setAttribute('draggable','true');
+    // Drag nativo (mouse): guardo a referência do elemento
+    el.addEventListener('dragstart', ()=> { if(!jogoEncerrado) currentDraggedEl = el; });
     itensDiv.appendChild(el);
   });
 
-  // ---------- DnD nativo (mouse) ----------
-  function permitirSoltar(e){ if (!jogoEncerrado) e.preventDefault(); }
-  function soltar(e, alvo){
-    if (jogoEncerrado) return;
+  // ----- Drag & Drop mouse (usando referência do elemento) -----
+  let currentDraggedEl = null;
+  function permitirSoltar(e){ if(!jogoEncerrado) e.preventDefault(); }
+  function dropMouse(e, alvo){
+    if(jogoEncerrado) return;
     e.preventDefault();
-    const nome = e.dataTransfer.getData("nome");
-    const tipo = e.dataTransfer.getData("tipo");
-    processarDrop(nome, tipo, alvo);
+    if(!currentDraggedEl) return;
+    processarDropElemento(currentDraggedEl, alvo);
+    currentDraggedEl = null;
   }
   window.permitirSoltar = permitirSoltar;
-  window.soltar = soltar;
+  window.dropMouse = dropMouse;
 
-  function processarDrop(nome, tipo, tipoAlvo){
-    const elOriginal = Array.from(document.querySelectorAll('.item')).find(el => el.textContent === nome && !el.classList.contains("acerto"));
-    if (!elOriginal) return;
-
-    if (tipo === "nenhum"){
+  // ----- Lógica unificada de drop (move o próprio card) -----
+  function processarDropElemento(el, tipoAlvo){
+    const tipo = el.dataset.tipo;
+    if(tipo === 'nenhum'){
       mostrarPopup("❌ Este item não pertence a nenhuma das categorias. Ignore.");
-      animarErro(elOriginal);
+      animarErro(el);
       return;
     }
-    if (tipo === tipoAlvo){
-      const novo = document.createElement("div");
-      novo.className = "item acerto";
-      novo.textContent = nome;
-      (tipoAlvo === "hardware" ? boxHardware : boxSoftware).appendChild(novo);
-      acertos++;
-      progressEl.textContent = `Progresso: ${acertos}/${totalCorretos}`;
-      elOriginal.remove();
-      verificarAcertos();
-    } else {
+    if(tipo !== tipoAlvo){
       const dica = tipoAlvo === "hardware"
-        ? "❌ Esse objeto não é um hardware!<br><br>💡 <strong>Hardware</strong> é a parte física do computador: peças como teclado, mouse e monitor."
-        : "❌ Esse objeto não é um software!<br><br>💡 <strong>Software</strong> são os programas que rodam no computador: como Word, Excel e navegadores.";
+        ? "❌ Esse objeto não é um hardware!<br><br>💡 <strong>Hardware</strong> é a parte física do computador: teclado, mouse, monitor, etc."
+        : "❌ Esse objeto não é um software!<br><br>💡 <strong>Software</strong> são os programas: Word, Excel, navegadores, etc.";
       mostrarPopup(dica);
-      animarErro(elOriginal);
+      animarErro(el);
+      return;
     }
+    // Move o próprio item para a caixa alvo
+    (tipoAlvo === 'hardware' ? boxHardware : boxSoftware).appendChild(el);
+    el.classList.add('acerto');
+    el.setAttribute('draggable','false');
+    acertos++;
+    progressEl.textContent = `Progresso: ${acertos}/${totalCorretos}`;
+    verificarAcertos();
   }
 
   function verificarAcertos(){
-    if (acertos >= totalCorretos){
-      jogoEncerrado = true; clearInterval(tId); bloquearArraste(true);
+    if(acertos >= totalCorretos){
+      jogoEncerrado = true; clearInterval(tId); bloquearTodos(true);
       mostrarPopup("✅ Parabéns! Você classificou todos os itens corretamente!");
       proximoBtn.style.display = "inline-block";
     }
   }
-  function bloquearArraste(flag){
+  function bloquearTodos(flag){
     document.querySelectorAll('.item').forEach(el=> el.setAttribute('draggable', String(!flag)));
   }
   function animarErro(el){
-    el.classList.add("vibrar"); if (navigator.vibrate) navigator.vibrate(120);
-    setTimeout(()=> el.classList.remove("vibrar"),600);
+    el.classList.add('vibrar'); if(navigator.vibrate) navigator.vibrate(120);
+    setTimeout(()=> el.classList.remove('vibrar'), 600);
   }
 
-  // ---------- Popup ----------
+  // ----- Popup -----
   function mostrarPopup(msg){ document.getElementById("mensagem").innerHTML = msg; document.getElementById("popup").style.display="block"; }
-  function fecharPopup(){ document.getElementById("popup").style.display = "none"; }
+  function fecharPopup(){ document.getElementById("popup").style.display="none"; }
   window.fecharPopup = fecharPopup;
-  document.getElementById('btnTryAgain').addEventListener('click', ()=> location.reload());
-
+  btnTryAgain.addEventListener('click', ()=> location.reload());
   function next(){ window.location.href = "fase8.html"; }
   window.next = next;
 
-  // ---------- Fallback TOUCH (Pointer Events) ----------
-  let floating = null, origemEl = null, origemParent = null;
-  let hoverTarget = null;
-
-  // util: checa se ponto (x,y) está sobre o elem
-  function hit(elem, x, y){
-    const r = elem.getBoundingClientRect();
-    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
-  }
-  function clearHighlights(){
-    [boxHardware, boxSoftware].forEach(b=> b.classList.remove('highlight'));
-    hoverTarget = null;
-  }
-
+  // ----- Fallback TOUCH (Pointer Events) movendo o próprio card -----
+  let floating = null, origemEl = null, origemParent = null, hoverTarget = null;
   document.addEventListener('pointerdown', (e)=>{
     const item = e.target.closest('.item');
-    if (!item || jogoEncerrado) return;
+    if(!item || jogoEncerrado) return;
 
-    // desativa drag nativo durante o touch
+    // Desativa drag nativo durante o toque pra não conflitar
     item.setAttribute('draggable','false');
 
     origemEl = item;
@@ -256,53 +200,54 @@
 
     moveFloating(e.clientX, e.clientY);
     item.setPointerCapture?.(e.pointerId);
-    window.addEventListener('pointermove', onPointerMove, { passive:false });
-    window.addEventListener('pointerup', onPointerUp, { once:true });
-  }, { passive:true });
+    window.addEventListener('pointermove', onPointerMove, {passive:false});
+    window.addEventListener('pointerup', onPointerUp, {once:true});
+  }, {passive:true});
+
+  function onPointerMove(e){
+    e.preventDefault();
+    moveFloating(e.clientX, e.clientY);
+  }
+  function onPointerUp(e){
+    window.removeEventListener('pointermove', onPointerMove);
+    floating?.remove(); floating = null;
+    boxHardware.classList.remove('highlight');
+    boxSoftware.classList.remove('highlight');
+
+    // Reativa para mouse depois do toque
+    origemEl?.setAttribute('draggable','true');
+
+    if(!origemEl){ hoverTarget=null; return; }
+
+    if(hoverTarget){
+      // Move o próprio card para a caixa correta
+      processarDropElemento(origemEl, hoverTarget);
+    } else {
+      // Volta pro lugar original se não estiver sobre alvo
+      origemParent?.appendChild(origemEl);
+    }
+    origemEl = origemParent = null; hoverTarget = null;
+  }
 
   function moveFloating(x,y){
-    if (!floating) return;
+    if(!floating) return;
     const rect = floating.getBoundingClientRect();
     const ox = rect.width/2, oy = rect.height/2;
     floating.style.transform = `translate(${x-ox}px, ${y-oy}px)`;
 
-    // highlight de alvo
-    const overHardware = hit(boxHardware, x, y);
-    const overSoftware = hit(boxSoftware, x, y);
-    [boxHardware, boxSoftware].forEach(b=> b.classList.remove('highlight'));
-    if (overHardware){ boxHardware.classList.add('highlight'); hoverTarget = 'hardware'; }
-    else if (overSoftware){ boxSoftware.classList.add('highlight'); hoverTarget = 'software'; }
-    else { hoverTarget = null; }
+    // Highlight/hover target por hit-test
+    const overH = hit(boxHardware,x,y);
+    const overS = hit(boxSoftware,x,y);
+    boxHardware.classList.toggle('highlight', overH);
+    boxSoftware.classList.toggle('highlight', overS);
+    hoverTarget = overH ? 'hardware' : (overS ? 'software' : null);
+  }
+  function hit(elem,x,y){
+    const r = elem.getBoundingClientRect();
+    return x>=r.left && x<=r.right && y>=r.top && y<=r.bottom;
   }
 
-  function onPointerMove(e){
-    // impedir scroll/zoom durante o arraste
-    e.preventDefault();
-    moveFloating(e.clientX, e.clientY);
-  }
-
-  function onPointerUp(e){
-    window.removeEventListener('pointermove', onPointerMove);
-    floating?.remove(); floating = null;
-    clearHighlights();
-
-    // reativa drag nativo para mouse após o toque
-    origemEl?.setAttribute('draggable','true');
-
-    if (!origemEl) return;
-
-    if (hoverTarget){
-      const nome = origemEl.textContent;
-      const tipo = origemEl.dataset.tipo;
-      processarDrop(nome, tipo, hoverTarget);
-    } else {
-      // volta pro container original
-      origemParent?.appendChild(origemEl);
-    }
-    origemEl = origemParent = null;
-  }
-
-  // ---------- Init ----------
+  // Start
   iniciarTimer();
   progressEl.textContent = `Progresso: ${acertos}/${totalCorretos}`;
 </script>
